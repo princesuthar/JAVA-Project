@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patients - Medical Prescription System</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <script th:src="@{/js/theme-toggle.js}" defer></script>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">🏥 Medical Prescription System</div>
+                <nav class="nav">
+                    <a th:href="@{'/doctor/dashboard?doctorId=' + ${doctor.id}}">Dashboard</a>
+                    <a th:href="@{'/doctor/patients?doctorId=' + ${doctor.id}}" style="background-color: rgba(255,255,255,0.2);">Patients</a>
+                    <a th:href="@{'/doctor/prescriptions?doctorId=' + ${doctor.id}}">Prescriptions</a>
+                    <a th:href="@{'/doctor/new-prescription?doctorId=' + ${doctor.id}}">New Prescription</a>
+                    <button id="theme-toggle" class="theme-toggle">🌙 Dark Mode</button>
+                    <span sec:authorize="isAuthenticated()" style="color: white;">
+                        👤 <span sec:authentication="name"></span>
+                    </span>
+                    <form th:action="@{/logout}" method="post" style="display: inline; margin: 0;">
+                        <button type="submit" class="theme-toggle" style="background: #e74c3c; cursor: pointer;">🚪 Logout</button>
+                    </form>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1>Patient Management</h1>
+                <p>Doctor: <span th:text="${doctor.name}"></span></p>
+            </div>
+
+            <div class="main-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h3>All Patients</h3>
+                    <div>
+                        <a th:href="@{'/doctor/patients/add?doctorId=' + ${doctor.id}}" class="btn btn-secondary" style="margin-right:8px;">Add Patient</a>
+                        <a th:href="@{'/doctor/new-prescription?doctorId=' + ${doctor.id}}" class="btn btn-primary">Create Prescription</a>
+                    </div>
+                </div>
+
+                <!-- Advanced Search & Filter Section -->
+                <div class="search-filter-container" style="background: var(--card-bg); padding: 1.5rem; border-radius: 10px; margin-bottom: 2rem; box-shadow: var(--shadow-md);">
+                    <form th:action="@{/doctor/patients/search}" method="get" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: end;">
+                        <input type="hidden" name="doctorId" th:value="${doctor.id}"/>
+                        
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-primary);">🔍 Search by Name/Phone</label>
+                            <input type="text" name="searchTerm" th:value="${searchTerm}" placeholder="Enter name or phone..." 
+                                   style="width: 100%; padding: 0.75rem; border: 2px solid var(--border-color); border-radius: 8px; background: var(--input-bg); color: var(--text-primary); transition: border-color 0.3s;"
+                                   onfocus="this.style.borderColor='#667eea'" onblur="this.style.borderColor='var(--border-color)'"/>
+                        </div>
+                        
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-primary);">👤 Gender</label>
+                            <select name="gender" style="width: 100%; padding: 0.75rem; border: 2px solid var(--border-color); border-radius: 8px; background: var(--input-bg); color: var(--text-primary);">
+                                <option value="">All Genders</option>
+                                <option value="MALE" th:selected="${gender == 'MALE'}">Male</option>
+                                <option value="FEMALE" th:selected="${gender == 'FEMALE'}">Female</option>
+                                <option value="OTHER" th:selected="${gender == 'OTHER'}">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-primary);">🩸 Blood Group</label>
+                            <select name="bloodGroup" style="width: 100%; padding: 0.75rem; border: 2px solid var(--border-color); border-radius: 8px; background: var(--input-bg); color: var(--text-primary);">
+                                <option value="">All Blood Groups</option>
+                                <option value="A+" th:selected="${bloodGroup == 'A+'}">A+</option>
+                                <option value="A-" th:selected="${bloodGroup == 'A-'}">A-</option>
+                                <option value="B+" th:selected="${bloodGroup == 'B+'}">B+</option>
+                                <option value="B-" th:selected="${bloodGroup == 'B-'}">B-</option>
+                                <option value="AB+" th:selected="${bloodGroup == 'AB+'}">AB+</option>
+                                <option value="AB-" th:selected="${bloodGroup == 'AB-'}">AB-</option>
+                                <option value="O+" th:selected="${bloodGroup == 'O+'}">O+</option>
+                                <option value="O-" th:selected="${bloodGroup == 'O-'}">O-</option>
+                            </select>
+                        </div>
+                        
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button type="submit" class="btn btn-primary" style="flex: 1;">🔍 Search</button>
+                            <a th:href="@{'/doctor/patients?doctorId=' + ${doctor.id}}" class="btn btn-secondary" style="flex: 1; text-align: center;">🔄 Clear</a>
+                        </div>
+                    </form>
+                    
+                    <!-- Search Results Summary -->
+                    <div th:if="${searchTerm != null || gender != null || bloodGroup != null}" style="margin-top: 1rem; padding: 1rem; background: var(--primary-gradient); color: white; border-radius: 8px;">
+                        <strong>🎯 Search Results:</strong> 
+                        <span th:text="${patients != null ? patients.size() : 0}"></span> patient(s) found
+                        <span th:if="${searchTerm != null and !searchTerm.isEmpty()}"> matching "<span th:text="${searchTerm}"></span>"</span>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table th:if="${patients != null and !patients.empty}">
+                        <thead>
+                            <tr>
+                                <th>Patient Name</th>
+                                <th>Age</th>
+                                <th>Gender</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Blood Group</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="patient : ${patients}">
+                                <td>
+                                    <a th:href="@{'/doctor/patient/' + ${patient.id} + '?doctorId=' + ${doctor.id}}" 
+                                       style="color: #3498db; text-decoration: none; font-weight: 500;">
+                                        <span th:text="${patient.name}"></span>
+                                    </a>
+                                </td>
+                                <td th:text="${patient.dateOfBirth != null ? #temporals.format(patient.dateOfBirth, 'dd-MM-yyyy') : 'N/A'}"></td>
+                                <td th:text="${patient.gender != null ? patient.gender : 'N/A'}"></td>
+                                <td th:text="${patient.phone != null ? patient.phone : 'N/A'}"></td>
+                                <td th:text="${patient.email != null ? patient.email : 'N/A'}"></td>
+                                <td th:text="${patient.bloodGroup != null ? patient.bloodGroup : 'N/A'}"></td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a th:href="@{'/doctor/patient/' + ${patient.id} + '?doctorId=' + ${doctor.id}}" 
+                                           class="btn btn-primary btn-sm">View Details</a>
+                                        <a th:href="@{'/doctor/patients/edit/' + ${patient.id} + '?doctorId=' + ${doctor.id}}" 
+                                           class="btn btn-warning btn-sm">Edit</a>
+                                        <a th:href="@{'/doctor/new-prescription?doctorId=' + ${doctor.id} + '&patientId=' + ${patient.id}}" 
+                                           class="btn btn-success btn-sm">New Prescription</a>
+                                        <form th:action="@{'/doctor/patients/delete/' + ${patient.id} + '?doctorId=' + ${doctor.id}}" 
+                                              method="post" 
+                                              style="display: inline;"
+                                              onsubmit="return confirm('Are you sure you want to delete this patient? This action cannot be undone.');">
+                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div th:if="${patients == null or patients.empty}" class="text-center" style="padding: 3rem;">
+                        <h3 style="color: #7f8c8d; margin-bottom: 1rem;">No Patients Found</h3>
+                        <p style="color: #95a5a6; margin-bottom: 2rem;">You haven't treated any patients yet.</p>
+                        <a th:href="@{'/doctor/new-prescription?doctorId=' + ${doctor.id}}" class="btn btn-primary">Create Your First Prescription</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- No client-side JS: search removed as requested -->
+</body>
+</html>
+
+

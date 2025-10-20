@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Details - Medical Prescription System</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <script th:src="@{/js/theme-toggle.js}" defer></script>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">🏥 Medical Prescription System</div>
+                <nav class="nav">
+                    <a th:href="@{'/doctor/dashboard?doctorId=' + ${doctor.id}}">Dashboard</a>
+                    <a th:href="@{'/doctor/patients?doctorId=' + ${doctor.id}}">Patients</a>
+                    <a th:href="@{'/doctor/prescriptions?doctorId=' + ${doctor.id}}">Prescriptions</a>
+                    <a th:href="@{'/doctor/new-prescription?doctorId=' + ${doctor.id}}">New Prescription</a>
+                    <button id="theme-toggle" class="theme-toggle">🌙 Dark Mode</button>
+                    <span sec:authorize="isAuthenticated()" style="color: white;">
+                        👤 <span sec:authentication="name"></span>
+                    </span>
+                    <form th:action="@{/logout}" method="post" style="display: inline; margin: 0;">
+                        <button type="submit" class="theme-toggle" style="background: #e74c3c; cursor: pointer;">🚪 Logout</button>
+                    </form>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1>Patient Details</h1>
+                <p>Doctor: <span th:text="${doctor.name}"></span></p>
+            </div>
+
+            <div class="content-grid">
+                <div class="main-content">
+                    <!-- Patient Information Card -->
+                    <div class="patient-card">
+                        <h3>Patient Information</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label><strong>Name:</strong></label>
+                                <p th:text="${patient.name}"></p>
+                            </div>
+                            <div class="form-group">
+                                <label><strong>Age:</strong></label>
+                                <p th:text="${patient.dateOfBirth != null ? #temporals.format(patient.dateOfBirth, 'dd-MM-yyyy') : 'N/A'}"></p>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label><strong>Gender:</strong></label>
+                                <p th:text="${patient.gender != null ? patient.gender : 'N/A'}"></p>
+                            </div>
+                            <div class="form-group">
+                                <label><strong>Blood Group:</strong></label>
+                                <p th:text="${patient.bloodGroup != null ? patient.bloodGroup : 'N/A'}"></p>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label><strong>Phone:</strong></label>
+                                <p th:text="${patient.phone != null ? patient.phone : 'N/A'}"></p>
+                            </div>
+                            <div class="form-group">
+                                <label><strong>Email:</strong></label>
+                                <p th:text="${patient.email != null ? patient.email : 'N/A'}"></p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label><strong>Address:</strong></label>
+                            <p th:text="${patient.address != null ? patient.address : 'N/A'}"></p>
+                        </div>
+                        <div class="form-group">
+                            <label><strong>Emergency Contact:</strong></label>
+                            <p th:text="${patient.emergencyContact != null ? patient.emergencyContact : 'N/A'}"></p>
+                        </div>
+                        <div class="form-group" th:if="${patient.allergies != null and !patient.allergies.isEmpty()}">
+                            <label><strong>Allergies:</strong></label>
+                            <p th:text="${patient.allergies}" style="color: #e74c3c; font-weight: bold;"></p>
+                        </div>
+                        <div class="form-group" th:if="${patient.medicalHistory != null and !patient.medicalHistory.isEmpty()}">
+                            <label><strong>Medical History:</strong></label>
+                            <p th:text="${patient.medicalHistory}"></p>
+                        </div>
+                    </div>
+
+                    <!-- Prescription History -->
+                    <div style="margin-top: 2rem;">
+                        <h3>Prescription History</h3>
+                        <div class="table-container">
+                            <table th:if="${prescriptions != null and !prescriptions.empty}">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Diagnosis</th>
+                                        <th>Symptoms</th>
+                                        <th>Medicines</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="prescription : ${prescriptions}">
+                                        <td th:text="${#temporals.format(prescription.createdAt, 'dd-MM-yyyy HH:mm')}"></td>
+                                        <td th:text="${prescription.diagnosis}"></td>
+                                        <td th:text="${prescription.symptoms != null ? prescription.symptoms : 'N/A'}"></td>
+                                        <td th:text="${prescription.prescriptionMedicines.size()}"></td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a th:href="@{'/pdf/prescription/' + ${prescription.id}}" 
+                                                   target="_blank" 
+                                                   class="btn btn-primary btn-sm">View PDF</a>
+                                                <a th:href="@{'/pdf/prescription/' + ${prescription.id} + '/download'}" 
+                                                   class="btn btn-success btn-sm">Download</a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <div th:if="${prescriptions == null or prescriptions.empty}" class="text-center" style="padding: 2rem;">
+                                <p style="color: #7f8c8d;">No prescriptions found for this patient.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar">
+                    <div class="sidebar-card">
+                        <h3>Quick Actions</h3>
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            <a th:href="@{'/doctor/patients/edit/' + ${patient.id} + '?doctorId=' + ${doctor.id}}" 
+                               class="btn btn-warning">Edit Patient Info</a>
+                            <a th:href="@{'/doctor/new-prescription?doctorId=' + ${doctor.id} + '&patientId=' + ${patient.id}}" 
+                               class="btn btn-primary">Create New Prescription</a>
+                            <a th:href="@{'/doctor/patients?doctorId=' + ${doctor.id}}" 
+                               class="btn btn-success">Back to Patients</a>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-card">
+                        <h3>Patient Summary</h3>
+                        <p><strong>Total Prescriptions:</strong> <span th:text="${prescriptions != null ? prescriptions.size() : 0}"></span></p>
+                        <p><strong>Last Visit:</strong> 
+                            <span th:if="${prescriptions != null and !prescriptions.empty}" 
+                                  th:text="${#temporals.format(prescriptions[0].createdAt, 'dd-MM-yyyy')}">N/A</span>
+                            <span th:if="${prescriptions == null or prescriptions.empty}">N/A</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
+
+

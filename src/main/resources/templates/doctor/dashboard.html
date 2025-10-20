@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Dashboard - Medical Prescription System</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <script th:src="@{/js/theme-toggle.js}" defer></script>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">🏥 Medical Prescription System</div>
+                <nav class="nav">
+                    <a th:href="@{'/doctor/dashboard?doctorId=' + ${doctor.id}}">Dashboard</a>
+                    <a th:href="@{'/doctor/patients?doctorId=' + ${doctor.id}}">Patients</a>
+                    <a th:href="@{'/doctor/prescriptions?doctorId=' + ${doctor.id}}">Prescriptions</a>
+                    <a th:href="@{'/doctor/new-prescription?doctorId=' + ${doctor.id}}">New Prescription</a>
+                    <button id="theme-toggle" class="theme-toggle">🌙 Dark Mode</button>
+                    <span sec:authorize="isAuthenticated()" style="color: white;">
+                        👤 <span sec:authentication="name"></span>
+                    </span>
+                    <form th:action="@{/logout}" method="post" style="display: inline; margin: 0;">
+                        <button type="submit" class="theme-toggle" style="background: #e74c3c; cursor: pointer;">🚪 Logout</button>
+                    </form>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1>Welcome, <span th:text="${doctor.name}"></span></h1>
+                <p>Specialization: <span th:text="${doctor.specialization}"></span></p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Prescriptions</h3>
+                    <div class="stat-number" th:text="${totalPrescriptions}">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Patients</h3>
+                    <div class="stat-number" th:text="${totalPatients}">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Recent Prescriptions</h3>
+                    <div class="stat-number" th:text="${recentPrescriptions.size()}">0</div>
+                </div>
+            </div>
+
+            <div class="content-grid">
+                <div class="main-content">
+                    <h3>Recent Prescriptions</h3>
+                    <div class="table-container">
+                        <table th:if="${recentPrescriptions != null and !recentPrescriptions.empty}">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Patient</th>
+                                    <th>Diagnosis</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="prescription : ${recentPrescriptions}">
+                                    <td th:text="${#temporals.format(prescription.createdAt, 'dd-MM-yyyy')}"></td>
+                                    <td th:text="${prescription.patient.name}"></td>
+                                    <td th:text="${prescription.diagnosis}"></td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a th:href="@{'/pdf/prescription/' + ${prescription.id}}" target="_blank" class="btn btn-primary btn-sm">View PDF</a>
+                                            <a th:href="@{'/doctor/patient/' + ${prescription.patient.id} + '?doctorId=' + ${doctor.id}}" class="btn btn-success btn-sm">View Patient</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p th:if="${recentPrescriptions == null or recentPrescriptions.empty}" class="text-center">
+                            No recent prescriptions found.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="sidebar">
+                    <div class="sidebar-card">
+                        <h3>Quick Actions</h3>
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            <a th:href="@{'/doctor/new-prescription?doctorId=' + ${doctor.id}}" class="btn btn-primary">Create New Prescription</a>
+                            <a th:href="@{'/doctor/patients?doctorId=' + ${doctor.id}}" class="btn btn-success">View All Patients</a>
+                            <a th:href="@{'/doctor/prescriptions?doctorId=' + ${doctor.id}}" class="btn btn-warning">View All Prescriptions</a>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-card">
+                        <h3>Doctor Information</h3>
+                        <p><strong>Name:</strong> Dr. Ishan Mota</p>
+                        <p><strong>Qualification:</strong> BDS, MDS - Conservative Dentistry and Endodontics</p>
+                        <p><strong>Email:</strong> info@identistindia.com</p>
+                        <p><strong>Phone:</strong> +91 95522 63314</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Auto-refresh dashboard every 30 seconds
+        setTimeout(function() {
+            location.reload();
+        }, 30000);
+    </script>
+</body>
+</html>
+
+

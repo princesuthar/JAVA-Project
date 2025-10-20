@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Prescription - Medical Prescription System</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <script th:src="@{/js/theme-toggle.js}" defer></script>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">🏥 Medical Prescription System</div>
+                <nav class="nav">
+                    <a th:href="@{'/doctor/dashboard?doctorId=' + ${doctor.id}}">Dashboard</a>
+                    <a th:href="@{'/doctor/patients?doctorId=' + ${doctor.id}}">Patients</a>
+                    <a th:href="@{'/doctor/prescriptions?doctorId=' + ${doctor.id}}">Prescriptions</a>
+                    <a th:href="@{'/doctor/new-prescription?doctorId=' + ${doctor.id}}" style="background-color: rgba(255,255,255,0.2);">New Prescription</a>
+                    <button id="theme-toggle" class="theme-toggle">🌙 Dark Mode</button>
+                    <span sec:authorize="isAuthenticated()" style="color: white;">
+                        👤 <span sec:authentication="name"></span>
+                    </span>
+                    <form th:action="@{/logout}" method="post" style="display: inline; margin: 0;">
+                        <button type="submit" class="theme-toggle" style="background: #e74c3c; cursor: pointer;">🚪 Logout</button>
+                    </form>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1>Create New Prescription</h1>
+                <p>Doctor: <span th:text="${doctor.name}"></span></p>
+            </div>
+
+            <form th:action="@{'/doctor/save-prescription'}" th:object="${prescription}" method="post" class="form-container">
+                <input type="hidden" name="doctorId" th:value="${doctor.id}">
+                
+                <div class="form-group">
+                    <label for="patientId">Select Patient *</label>
+                    <select id="patientId" name="patientId" class="form-control" required>
+                        <option value="">-- Select Patient --</option>
+                        <option th:each="patient : ${patients}" 
+                                th:value="${patient.id}" 
+                                th:text="${patient.name + ' (' + patient.phone + ')'}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="diagnosis">Diagnosis *</label>
+                        <input type="text" id="diagnosis" th:field="*{diagnosis}" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="symptoms">Symptoms</label>
+                        <input type="text" id="symptoms" th:field="*{symptoms}" class="form-control">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="notes">Clinical Notes</label>
+                    <textarea id="notes" th:field="*{notes}" class="form-control" rows="4" 
+                              placeholder="Enter any additional clinical notes or recommendations..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="followUpDate">Follow-up Date</label>
+                    <input type="datetime-local" id="followUpDate" th:field="*{followUpDate}" class="form-control">
+                </div>
+
+                <!-- Medicine Section -->
+                <div class="form-group">
+                    <h3>Prescribed Medicines</h3>
+                    
+                    <!-- Hidden datalist for autocomplete -->
+                    <datalist id="medicines-list">
+                        <option th:each="med : ${medicines}" 
+                                th:value="${med.name}" 
+                                th:text="${med.name + (med.strength != null ? ' - ' + med.strength : '')}">
+                        </option>
+                    </datalist>
+                    
+                    <div id="medicines-container">
+                        <div class="medicine-row" style="display: flex; gap: 1rem; margin-bottom: 1rem; align-items: end;">
+                            <div style="flex: 2;">
+                                <label>Medicine Name * 💊</label>
+                                <input type="text" 
+                                       name="medicines[0].name" 
+                                       class="form-control" 
+                                       list="medicines-list"
+                                       placeholder="Type or select medicine name" 
+                                       autocomplete="off"
+                                       required>
+                            </div>
+                            <div style="flex: 1;">
+                                <label>Dosage *</label>
+                                <input type="text" name="medicines[0].dosage" class="form-control" placeholder="e.g., 500mg" required>
+                            </div>
+                            <div style="flex: 1;">
+                                <label>Frequency *</label>
+                                <input type="text" name="medicines[0].frequency" class="form-control" placeholder="e.g., 2 times daily" required>
+                            </div>
+                            <div style="flex: 1;">
+                                <label>Quantity *</label>
+                                <input type="number" name="medicines[0].quantity" class="form-control" placeholder="10" min="1" required>
+                            </div>
+                            <div style="flex: 1;">
+                                <label>Duration</label>
+                                <input type="text" name="medicines[0].duration" class="form-control" placeholder="e.g., 7 days">
+                            </div>
+                            <div style="flex: 2;">
+                                <label>Instructions</label>
+                                <input type="text" name="medicines[0].instructions" class="form-control" placeholder="Take with food, etc.">
+                            </div>
+                            <div style="flex: 0;">
+                                <button type="button" class="btn btn-danger" onclick="removeMedicine(this)" style="margin-top: 1.5rem;">Remove</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-success" onclick="addMedicine()">Add Another Medicine</button>
+                </div>
+
+                <div class="form-group">
+                    <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
+                        <button type="submit" class="btn btn-primary">Save Prescription</button>
+                        <a th:href="@{'/doctor/dashboard?doctorId=' + ${doctor.id}}" class="btn btn-danger">Cancel</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        let medicineIndex = 1;
+
+        function addMedicine() {
+            const container = document.getElementById('medicines-container');
+            const newRow = document.createElement('div');
+            newRow.className = 'medicine-row';
+            newRow.style.cssText = 'display: flex; gap: 1rem; margin-bottom: 1rem; align-items: end;';
+            
+            newRow.innerHTML = `
+                <div style="flex: 2;">
+                    <label>Medicine Name * 💊</label>
+                    <input type="text" 
+                           name="medicines[${medicineIndex}].name" 
+                           class="form-control" 
+                           list="medicines-list"
+                           placeholder="Type or select medicine name" 
+                           autocomplete="off"
+                           required>
+                </div>
+                <div style="flex: 1;">
+                    <label>Dosage *</label>
+                    <input type="text" name="medicines[${medicineIndex}].dosage" class="form-control" placeholder="e.g., 500mg" required>
+                </div>
+                <div style="flex: 1;">
+                    <label>Frequency *</label>
+                    <input type="text" name="medicines[${medicineIndex}].frequency" class="form-control" placeholder="e.g., 2 times daily" required>
+                </div>
+                <div style="flex: 1;">
+                    <label>Quantity *</label>
+                    <input type="number" name="medicines[${medicineIndex}].quantity" class="form-control" placeholder="10" min="1" required>
+                </div>
+                <div style="flex: 1;">
+                    <label>Duration</label>
+                    <input type="text" name="medicines[${medicineIndex}].duration" class="form-control" placeholder="e.g., 7 days">
+                </div>
+                <div style="flex: 2;">
+                    <label>Instructions</label>
+                    <input type="text" name="medicines[${medicineIndex}].instructions" class="form-control" placeholder="Take with food, etc.">
+                </div>
+                <div style="flex: 0;">
+                    <button type="button" class="btn btn-danger" onclick="removeMedicine(this)" style="margin-top: 1.5rem;">Remove</button>
+                </div>
+            `;
+            
+            container.appendChild(newRow);
+            medicineIndex++;
+        }
+
+        function removeMedicine(button) {
+            const container = document.getElementById('medicines-container');
+            if (container.children.length > 1) {
+                button.parentElement.parentElement.remove();
+            }
+        }
+
+        // Form validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const patientId = document.getElementById('patientId').value;
+            const diagnosis = document.getElementById('diagnosis').value;
+            
+            if (!patientId || !diagnosis) {
+                e.preventDefault();
+                alert('Please fill in all required fields.');
+                return;
+            }
+            
+            // Check if at least one medicine is added
+            const medicineRows = document.querySelectorAll('.medicine-row');
+            let hasValidMedicine = false;
+            
+            medicineRows.forEach(row => {
+                const name = row.querySelector('input[name$=".name"]').value;
+                const dosage = row.querySelector('input[name$=".dosage"]').value;
+                const frequency = row.querySelector('input[name$=".frequency"]').value;
+                const quantity = row.querySelector('input[name$=".quantity"]').value;
+                
+                if (name && dosage && frequency && quantity) {
+                    hasValidMedicine = true;
+                }
+            });
+            
+            if (!hasValidMedicine) {
+                e.preventDefault();
+                alert('Please add at least one medicine with all required fields.');
+                return;
+            }
+        });
+    </script>
+</body>
+</html>
+
+

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Patient - Medical Prescription System</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <script th:src="@{/js/theme-toggle.js}" defer></script>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">🏥 Medical Prescription System</div>
+                <nav class="nav">
+                    <a th:href="@{'/doctor/dashboard?doctorId=' + ${doctor.id}}">Dashboard</a>
+                    <a th:href="@{'/doctor/patients?doctorId=' + ${doctor.id}}">Patients</a>
+                    <a th:href="@{'/doctor/prescriptions?doctorId=' + ${doctor.id}}">Prescriptions</a>
+                    <a th:href="@{'/doctor/new-prescription?doctorId=' + ${doctor.id}}">New Prescription</a>
+                    <button id="theme-toggle" class="theme-toggle">🌙 Dark Mode</button>
+                    <span sec:authorize="isAuthenticated()" style="color: white;">
+                        👤 <span sec:authentication="name"></span>
+                    </span>
+                    <form th:action="@{/logout}" method="post" style="display: inline; margin: 0;">
+                        <button type="submit" class="theme-toggle" style="background: #e74c3c; cursor: pointer;">🚪 Logout</button>
+                    </form>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1>Add New Patient</h1>
+                <p>Doctor: <span th:text="${doctor.name}"></span></p>
+            </div>
+
+            <div class="main-content">
+                <form th:action="@{'/doctor/patients/save?doctorId=' + ${doctor.id}}" th:object="${patient}" method="post" class="form">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" th:field="*{name}" class="form-control" required />
+                        <div class="error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dateOfBirth">Date of Birth</label>
+                        <input type="date" id="dateOfBirth" th:field="*{dateOfBirth}" class="form-control" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="gender">Gender</label>
+                        <select id="gender" th:field="*{gender}" class="form-control">
+                            <option th:each="g : ${genders}" th:value="${g}" th:text="${g}"></option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" th:field="*{email}" class="form-control" />
+                        <div class="error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Phone</label>
+                        <input type="text" id="phone" th:field="*{phone}" class="form-control" />
+                        <div class="error" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="address">Address</label>
+                        <textarea id="address" th:field="*{address}" class="form-control"></textarea>
+                    </div>
+
+                    <div style="display:flex; gap:8px; margin-top:1rem;">
+                        <button type="submit" class="btn btn-primary">Save Patient</button>
+                        <a th:href="@{'/doctor/patients?doctorId=' + ${doctor.id}}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

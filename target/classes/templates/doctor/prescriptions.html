@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prescriptions - Medical Prescription System</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <script th:src="@{/js/theme-toggle.js}" defer></script>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">🏥 Medical Prescription System</div>
+                <nav class="nav">
+                    <a th:href="@{'/doctor/dashboard?doctorId=' + ${doctor.id}}">Dashboard</a>
+                    <a th:href="@{'/doctor/patients?doctorId=' + ${doctor.id}}">Patients</a>
+                    <a th:href="@{'/doctor/prescriptions?doctorId=' + ${doctor.id}}" style="background-color: rgba(255,255,255,0.2);">Prescriptions</a>
+                    <a th:href="@{'/doctor/new-prescription?doctorId=' + ${doctor.id}}">New Prescription</a>
+                    <button id="theme-toggle" class="theme-toggle">🌙 Dark Mode</button>
+                    <span sec:authorize="isAuthenticated()" style="color: white;">
+                        👤 <span sec:authentication="name"></span>
+                    </span>
+                    <form th:action="@{/logout}" method="post" style="display: inline; margin: 0;">
+                        <button type="submit" class="theme-toggle" style="background: #e74c3c; cursor: pointer;">🚪 Logout</button>
+                    </form>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1>Prescription History</h1>
+                <p>Doctor: <span th:text="${doctor.name}"></span></p>
+            </div>
+
+            <div class="main-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h3>All Prescriptions</h3>
+                    <a th:href="@{'/doctor/new-prescription?doctorId=' + ${doctor.id}}" class="btn btn-primary">Create New Prescription</a>
+                </div>
+
+                <!-- Advanced Search & Filter for Prescriptions -->
+                <div class="search-filter-container" style="background: var(--card-bg); padding: 1.5rem; border-radius: 10px; margin-bottom: 2rem; box-shadow: var(--shadow-md);">
+                    <form th:action="@{/doctor/prescriptions/search}" method="get" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; align-items: end;">
+                        <input type="hidden" name="doctorId" th:value="${doctor.id}"/>
+                        
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-primary);">🔍 Search Patient/Diagnosis</label>
+                            <input type="text" name="searchTerm" th:value="${searchTerm}" placeholder="Patient name or diagnosis..." 
+                                   style="width: 100%; padding: 0.75rem; border: 2px solid var(--border-color); border-radius: 8px; background: var(--input-bg); color: var(--text-primary); transition: border-color 0.3s;"
+                                   onfocus="this.style.borderColor='#667eea'" onblur="this.style.borderColor='var(--border-color)'"/>
+                        </div>
+                        
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-primary);">📅 From Date</label>
+                            <input type="date" name="fromDate" th:value="${fromDate}" 
+                                   style="width: 100%; padding: 0.75rem; border: 2px solid var(--border-color); border-radius: 8px; background: var(--input-bg); color: var(--text-primary);"/>
+                        </div>
+                        
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-primary);">📅 To Date</label>
+                            <input type="date" name="toDate" th:value="${toDate}" 
+                                   style="width: 100%; padding: 0.75rem; border: 2px solid var(--border-color); border-radius: 8px; background: var(--input-bg); color: var(--text-primary);"/>
+                        </div>
+                        
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button type="submit" class="btn btn-primary" style="flex: 1;">🔍 Search</button>
+                            <a th:href="@{'/doctor/prescriptions?doctorId=' + ${doctor.id}}" class="btn btn-secondary" style="flex: 1; text-align: center;">🔄 Clear</a>
+                        </div>
+                    </form>
+                    
+                    <!-- Search Results Summary -->
+                    <div th:if="${searchTerm != null || fromDate != null || toDate != null}" style="margin-top: 1rem; padding: 1rem; background: var(--primary-gradient); color: white; border-radius: 8px;">
+                        <strong>🎯 Search Results:</strong> 
+                        <span th:text="${prescriptions != null ? prescriptions.size() : 0}"></span> prescription(s) found
+                        <span th:if="${fromDate != null and toDate != null}"> from <span th:text="${fromDate}"></span> to <span th:text="${toDate}"></span></span>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table th:if="${prescriptions != null and !prescriptions.empty}">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Patient Name</th>
+                                <th>Diagnosis</th>
+                                <th>Symptoms</th>
+                                <th>Medicines Count</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="prescription : ${prescriptions}">
+                                <td th:text="${#temporals.format(prescription.createdAt, 'dd-MM-yyyy HH:mm')}"></td>
+                                <td>
+                                    <a th:href="@{'/doctor/patient/' + ${prescription.patient.id} + '?doctorId=' + ${doctor.id}}" 
+                                       style="color: #3498db; text-decoration: none;">
+                                        <span th:text="${prescription.patient.name}"></span>
+                                    </a>
+                                </td>
+                                <td th:text="${prescription.diagnosis}"></td>
+                                <td th:text="${prescription.symptoms != null ? prescription.symptoms : 'N/A'}"></td>
+                                <td th:text="${prescription.prescriptionMedicines.size()}"></td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a th:href="@{'/pdf/prescription/' + ${prescription.id}}" 
+                                           target="_blank" 
+                                           class="btn btn-primary btn-sm">View PDF</a>
+                                        <a th:href="@{'/pdf/prescription/' + ${prescription.id} + '/download'}" 
+                                           class="btn btn-success btn-sm">Download</a>
+                                        <a th:href="@{'/doctor/patient/' + ${prescription.patient.id} + '?doctorId=' + ${doctor.id}}" 
+                                           class="btn btn-warning btn-sm">View Patient</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div th:if="${prescriptions == null or prescriptions.empty}" class="text-center" style="padding: 3rem;">
+                        <h3 style="color: #7f8c8d; margin-bottom: 1rem;">No Prescriptions Found</h3>
+                        <p style="color: #95a5a6; margin-bottom: 2rem;">You haven't created any prescriptions yet.</p>
+                        <a th:href="@{'/doctor/new-prescription?doctorId=' + ${doctor.id}}" class="btn btn-primary">Create Your First Prescription</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Add search functionality
+        function searchPrescriptions() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const table = document.querySelector('table');
+            
+            if (!table) return;
+            
+            const rows = table.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // Add search input if not exists
+        document.addEventListener('DOMContentLoaded', function() {
+            const header = document.querySelector('.main-content h3').parentElement;
+            const searchContainer = document.createElement('div');
+            searchContainer.style.cssText = 'margin-bottom: 1rem;';
+            searchContainer.innerHTML = `
+                <input type="text" id="searchInput" placeholder="Search prescriptions..." 
+                       class="form-control" style="max-width: 300px; display: inline-block;"
+                       onkeyup="searchPrescriptions()">
+            `;
+            header.appendChild(searchContainer);
+        });
+    </script>
+</body>
+</html>
+
+

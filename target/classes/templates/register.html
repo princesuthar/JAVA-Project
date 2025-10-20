@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Medical Prescription System</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .register-container {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .register-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .register-header h1 {
+            color: #2c3e50;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        .register-header p {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            color: #2c3e50;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .btn-register {
+            width: 100%;
+            padding: 12px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .btn-register:hover {
+            background: #229954;
+        }
+        .alert {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        .alert-error {
+            background: #fee;
+            color: #c33;
+            border: 1px solid #fcc;
+        }
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #7f8c8d;
+        }
+        .login-link a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .error-message {
+            color: #e74c3c;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="register-container">
+        <div class="register-header">
+            <h1>🏥 Create Account</h1>
+            <p>Register to access the Medical Prescription System</p>
+        </div>
+        
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+        
+        <form th:action="@{/register}" th:object="${user}" method="post">
+            <div class="form-group">
+                <label for="fullName">Full Name</label>
+                <input type="text" id="fullName" th:field="*{fullName}" required placeholder="Dr. John Doe">
+                <div class="error-message" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" th:field="*{username}" required placeholder="john_doe">
+                <div class="error-message" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" th:field="*{email}" required placeholder="john.doe@hospital.com">
+                <div class="error-message" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" th:field="*{password}" required placeholder="Minimum 6 characters">
+                <div class="error-message" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+            </div>
+            
+            <button type="submit" class="btn-register">Create Account</button>
+        </form>
+        
+        <div class="login-link">
+            Already have an account? <a th:href="@{/login}">Login here</a>
+        </div>
+    </div>
+</body>
+</html>
