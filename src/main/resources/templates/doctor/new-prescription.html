@@ -85,7 +85,7 @@
                     </datalist>
                     
                     <div id="medicines-container">
-                        <div class="medicine-row" style="display: flex; gap: 1rem; margin-bottom: 1rem; align-items: end;">
+                        <div class="medicine-row" style="display: flex; gap: 1rem; margin-bottom: 1rem; align-items: end; flex-wrap: wrap;">
                             <div style="flex: 2;">
                                 <label>Medicine Name * 💊</label>
                                 <input type="text" 
@@ -103,6 +103,18 @@
                             <div style="flex: 1;">
                                 <label>Frequency *</label>
                                 <input type="text" name="medicines[0].frequency" class="form-control" placeholder="e.g., 2 times daily" required>
+                            </div>
+                            <div style="flex: 1;">
+                                <label>Morning</label>
+                                <input type="text" name="medicines[0].morningDose" class="form-control" placeholder="e.g., 1/2 or 1 or 0">
+                            </div>
+                            <div style="flex: 1;">
+                                <label>Afternoon</label>
+                                <input type="text" name="medicines[0].afternoonDose" class="form-control" placeholder="e.g., 1/2 or 1 or 0">
+                            </div>
+                            <div style="flex: 1;">
+                                <label>Dinner</label>
+                                <input type="text" name="medicines[0].nightDose" class="form-control" placeholder="e.g., 1/2 or 1 or 0">
                             </div>
                             <div style="flex: 1;">
                                 <label>Quantity *</label>
@@ -161,6 +173,18 @@
                 <div style="flex: 1;">
                     <label>Frequency *</label>
                     <input type="text" name="medicines[${medicineIndex}].frequency" class="form-control" placeholder="e.g., 2 times daily" required>
+                </div>
+                <div style="flex: 1;">
+                    <label>Morning</label>
+                    <input type="text" name="medicines[${medicineIndex}].morningDose" class="form-control" placeholder="e.g., 1/2 or 1 or 0">
+                </div>
+                <div style="flex: 1;">
+                    <label>Afternoon</label>
+                    <input type="text" name="medicines[${medicineIndex}].afternoonDose" class="form-control" placeholder="e.g., 1/2 or 1 or 0">
+                </div>
+                <div style="flex: 1;">
+                    <label>Dinner</label>
+                    <input type="text" name="medicines[${medicineIndex}].nightDose" class="form-control" placeholder="e.g., 1/2 or 1 or 0">
                 </div>
                 <div style="flex: 1;">
                     <label>Quantity *</label>

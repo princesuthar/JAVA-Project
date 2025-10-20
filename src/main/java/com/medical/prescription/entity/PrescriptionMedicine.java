@@ -46,6 +46,16 @@ public class PrescriptionMedicine {
     
     @Column(name = "is_after_meal")
     private Boolean isAfterMeal = false;
+
+    // New: Dosage schedule per time of day
+    @Column(name = "morning_dose", length = 10)
+    private String morningDose; // e.g., "1", "1/2", "0"
+
+    @Column(name = "afternoon_dose", length = 10)
+    private String afternoonDose; // e.g., "1", "1/2", "0"
+
+    @Column(name = "night_dose", length = 10)
+    private String nightDose; // e.g., "1", "1/2", "0"
     
     // Constructors
     public PrescriptionMedicine() {}
@@ -137,6 +147,30 @@ public class PrescriptionMedicine {
     
     public void setIsAfterMeal(Boolean isAfterMeal) {
         this.isAfterMeal = isAfterMeal;
+    }
+
+    public String getMorningDose() {
+        return morningDose;
+    }
+
+    public void setMorningDose(String morningDose) {
+        this.morningDose = morningDose;
+    }
+
+    public String getAfternoonDose() {
+        return afternoonDose;
+    }
+
+    public void setAfternoonDose(String afternoonDose) {
+        this.afternoonDose = afternoonDose;
+    }
+
+    public String getNightDose() {
+        return nightDose;
+    }
+
+    public void setNightDose(String nightDose) {
+        this.nightDose = nightDose;
     }
 }
 

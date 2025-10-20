@@ -184,15 +184,15 @@ public class PdfServiceImpl implements PdfService {
                 medicinesHeader.setSpacingAfter(10f);
                 document.add(medicinesHeader);
                 
-                // Create table for medicines
+                // Create main table for medicines (without schedule)
                 PdfPTable table = new PdfPTable(5);
                 table.setWidthPercentage(100);
                 table.setSpacingAfter(10f);
-                
+
                 // Set column widths (Medicine name gets more space)
                 float[] columnWidths = {3f, 2f, 2f, 1.5f, 3f};
                 table.setWidths(columnWidths);
-                
+
                 // Add headers with colored background
                 String[] headers = {"Medicine Name", "Dosage", "Frequency", "Quantity", "Instructions"};
                 Font headerFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, Color.WHITE);
@@ -204,48 +204,107 @@ public class PdfServiceImpl implements PdfService {
                     cell.setBorder(Rectangle.NO_BORDER);
                     table.addCell(cell);
                 }
-                
+
                 // Add medicine data with alternating row colors
                 Font cellFont = FontFactory.getFont(FontFactory.HELVETICA, 9);
                 int rowIndex = 0;
                 for (PrescriptionMedicine pm : prescription.getPrescriptionMedicines()) {
                     Color rowColor = (rowIndex % 2 == 0) ? Color.WHITE : new Color(248, 248, 252);
-                    
-                    PdfPCell cell1 = new PdfPCell(new Phrase(pm.getMedicine().getName(), cellFont));
+
+                    PdfPCell cell1 = new PdfPCell(new Phrase(pm.getMedicine() != null ? pm.getMedicine().getName() : "-", cellFont));
                     cell1.setBackgroundColor(rowColor);
                     cell1.setPadding(8f);
                     cell1.setBorder(Rectangle.NO_BORDER);
                     table.addCell(cell1);
-                    
-                    PdfPCell cell2 = new PdfPCell(new Phrase(pm.getDosage(), cellFont));
+
+                    PdfPCell cell2 = new PdfPCell(new Phrase(pm.getDosage() != null ? pm.getDosage() : "-", cellFont));
                     cell2.setBackgroundColor(rowColor);
                     cell2.setPadding(8f);
                     cell2.setBorder(Rectangle.NO_BORDER);
                     table.addCell(cell2);
-                    
-                    PdfPCell cell3 = new PdfPCell(new Phrase(pm.getFrequency(), cellFont));
+
+                    PdfPCell cell3 = new PdfPCell(new Phrase(pm.getFrequency() != null ? pm.getFrequency() : "-", cellFont));
                     cell3.setBackgroundColor(rowColor);
                     cell3.setPadding(8f);
                     cell3.setBorder(Rectangle.NO_BORDER);
                     table.addCell(cell3);
-                    
-                    PdfPCell cell4 = new PdfPCell(new Phrase(pm.getQuantity().toString(), cellFont));
+
+                    PdfPCell cell4 = new PdfPCell(new Phrase(pm.getQuantity() != null ? pm.getQuantity().toString() : "-", cellFont));
                     cell4.setBackgroundColor(rowColor);
                     cell4.setPadding(8f);
                     cell4.setHorizontalAlignment(Element.ALIGN_CENTER);
                     cell4.setBorder(Rectangle.NO_BORDER);
                     table.addCell(cell4);
-                    
+
                     PdfPCell cell5 = new PdfPCell(new Phrase(pm.getInstructions() != null ? pm.getInstructions() : "-", cellFont));
                     cell5.setBackgroundColor(rowColor);
                     cell5.setPadding(8f);
                     cell5.setBorder(Rectangle.NO_BORDER);
                     table.addCell(cell5);
-                    
+
                     rowIndex++;
                 }
-                
+
                 document.add(table);
+
+                // Separate Dosage Schedule Table
+                Font scheduleHeaderFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, new Color(102, 126, 234));
+                Paragraph scheduleHeader = new Paragraph("DOSAGE SCHEDULE", scheduleHeaderFont);
+                scheduleHeader.setSpacingBefore(5f);
+                scheduleHeader.setSpacingAfter(10f);
+                document.add(scheduleHeader);
+
+                PdfPTable scheduleTable = new PdfPTable(4);
+                scheduleTable.setWidthPercentage(100);
+                scheduleTable.setSpacingAfter(10f);
+                float[] scheduleWidths = {3.5f, 1.2f, 1.2f, 1.2f};
+                scheduleTable.setWidths(scheduleWidths);
+
+                String[] scheduleHeaders = {"Medicine Name", "Morning", "Afternoon", "Dinner"};
+                for (String headerText : scheduleHeaders) {
+                    PdfPCell cell = new PdfPCell(new Phrase(headerText, headerFont));
+                    cell.setBackgroundColor(new Color(102, 126, 234));
+                    cell.setPadding(8f);
+                    cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                    cell.setBorder(Rectangle.NO_BORDER);
+                    scheduleTable.addCell(cell);
+                }
+
+                rowIndex = 0;
+                for (PrescriptionMedicine pm : prescription.getPrescriptionMedicines()) {
+                    Color rowColor = (rowIndex % 2 == 0) ? Color.WHITE : new Color(248, 248, 252);
+
+                    PdfPCell mCell = new PdfPCell(new Phrase(pm.getMedicine() != null ? pm.getMedicine().getName() : "-", cellFont));
+                    mCell.setBackgroundColor(rowColor);
+                    mCell.setPadding(8f);
+                    mCell.setBorder(Rectangle.NO_BORDER);
+                    scheduleTable.addCell(mCell);
+
+                    PdfPCell morning = new PdfPCell(new Phrase(pm.getMorningDose() != null && !pm.getMorningDose().isBlank() ? pm.getMorningDose() : "-", cellFont));
+                    morning.setBackgroundColor(rowColor);
+                    morning.setPadding(8f);
+                    morning.setHorizontalAlignment(Element.ALIGN_CENTER);
+                    morning.setBorder(Rectangle.NO_BORDER);
+                    scheduleTable.addCell(morning);
+
+                    PdfPCell afternoon = new PdfPCell(new Phrase(pm.getAfternoonDose() != null && !pm.getAfternoonDose().isBlank() ? pm.getAfternoonDose() : "-", cellFont));
+                    afternoon.setBackgroundColor(rowColor);
+                    afternoon.setPadding(8f);
+                    afternoon.setHorizontalAlignment(Element.ALIGN_CENTER);
+                    afternoon.setBorder(Rectangle.NO_BORDER);
+                    scheduleTable.addCell(afternoon);
+
+                    PdfPCell dinner = new PdfPCell(new Phrase(pm.getNightDose() != null && !pm.getNightDose().isBlank() ? pm.getNightDose() : "-", cellFont));
+                    dinner.setBackgroundColor(rowColor);
+                    dinner.setPadding(8f);
+                    dinner.setHorizontalAlignment(Element.ALIGN_CENTER);
+                    dinner.setBorder(Rectangle.NO_BORDER);
+                    scheduleTable.addCell(dinner);
+
+                    rowIndex++;
+                }
+
+                document.add(scheduleTable);
             }
             
             // Notes Section

@@ -235,6 +235,9 @@ public class DoctorController {
                 String quantityStr = request.getParameter(base + ".quantity");
                 String duration = request.getParameter(base + ".duration");
                 String instructions = request.getParameter(base + ".instructions");
+                String morningDose = request.getParameter(base + ".morningDose");
+                String afternoonDose = request.getParameter(base + ".afternoonDose");
+                String nightDose = request.getParameter(base + ".nightDose");
 
                 // find existing medicine by name (contains) or create new
                 Medicine medicine = null;
@@ -263,6 +266,9 @@ public class DoctorController {
                 }
                 pm.setDuration(duration);
                 pm.setInstructions(instructions);
+                pm.setMorningDose(morningDose);
+                pm.setAfternoonDose(afternoonDose);
+                pm.setNightDose(nightDose);
 
                 // attach to prescription
                 prescription.getPrescriptionMedicines().add(pm);
