@@ -38,6 +38,13 @@
 
             <div class="main-content">
                 <form th:action="@{'/doctor/patients/save?doctorId=' + ${doctor.id}}" th:object="${patient}" method="post" class="form">
+                    <!-- Display validation errors at the top -->
+                    <div th:if="${#fields.hasErrors('*')}" class="alert alert-danger" style="background: #fee; border: 1px solid #fcc; padding: 1rem; margin-bottom: 1rem; border-radius: 4px; color: #c33;">
+                        <h4 style="margin-top: 0;">Please fix the following errors:</h4>
+                        <ul style="margin: 0.5rem 0;">
+                            <li th:each="err : ${#fields.errors('*')}" th:text="${err}"></li>
+                        </ul>
+                    </div>
                     <div class="form-group">
                         <label for="name">Name</label>
                         <input type="text" id="name" th:field="*{name}" class="form-control" required />

@@ -79,7 +79,7 @@ public class DataInitializer implements CommandLineRunner {
     private void initializeSampleData() {
         // Create sample doctors
         Doctor doctor1 = new Doctor("Dr. Ishan Mota", "Conservative Dentistry and Endodontics", "DOC001", 
-                                   "info@identistindia.com", "+91 95522 63314", 
+                                   "info@identistindia.com", "+919552263314", 
                                    "India", "BDS, MDS - Conservative Dentistry and Endodontics");
         doctor1 = doctorRepository.save(doctor1);
         

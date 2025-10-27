@@ -33,7 +33,7 @@ public class Patient {
     @Column(name = "email")
     private String email;
     
-    @Pattern(regexp = "^\\+?[1-9]\\d{1,14}$", message = "Invalid phone number")
+    @Pattern(regexp = "^[\\+]?[(]?[0-9]{1,4}[)]?[-\\s\\.]?[(]?[0-9]{1,4}[)]?[-\\s\\.]?[0-9]{1,9}$", message = "Invalid phone number format")
     @Column(name = "phone")
     private String phone;
     
